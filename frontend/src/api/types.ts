@@ -23,12 +23,17 @@ export interface ApiErrorResponse {
 }
 
 export class CalculatorApiError extends Error {
+  readonly code: string
+  readonly details?: Record<string, unknown>
+
   constructor(
-    public readonly code: string,
+    code: string,
     message: string,
-    public readonly details?: Record<string, unknown>
+    details?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'CalculatorApiError'
+    this.code = code
+    this.details = details
   }
 }
