@@ -11,10 +11,10 @@ import { History } from './History'
 import { useEffect } from 'react'
 
 export function Calculator() {
-  const { selectedOperation, selectOperation, result, error, isLoading, performCalculation } = useCalculator()
+  const { selectedOperation, selectOperation, result, error, isLoading, performCalculation, clear, reset } = useCalculator()
   const { entries, addEntry, clearHistory } = useHistory()
 
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<CalculatorFormData>({
+  const { register, handleSubmit, setValue, reset: resetForm, formState: { errors } } = useForm<CalculatorFormData>({
     defaultValues: { operandA: '', operandB: '' },
   })
 
@@ -23,6 +23,17 @@ export function Calculator() {
   useEffect(() => {
     if (unary) { setValue('operandB', '') }
   }, [unary, setValue])
+
+  const handleClear = () => {
+    clear()
+    resetForm({ operandA: '', operandB: '' })
+  }
+
+  const handleAllClear = () => {
+    reset()
+    resetForm({ operandA: '', operandB: '' })
+    clearHistory()
+  }
 
   const onSubmit = async (data: CalculatorFormData) => {
     const parsedA = operandSchema.safeParse(data.operandA)
@@ -42,6 +53,24 @@ export function Calculator() {
   return (
     <div className="mx-auto w-full max-w-md space-y-4 p-4">
       <Display result={result?.result ?? null} error={error} isLoading={isLoading} />
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={handleClear}
+          aria-label="Clear"
+          className="rounded-lg bg-gray-200 p-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-300"
+        >
+          C
+        </button>
+        <button
+          type="button"
+          onClick={handleAllClear}
+          aria-label="All Clear"
+          className="rounded-lg bg-red-100 p-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-200"
+        >
+          AC
+        </button>
+      </div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <OperandInputs register={register} errors={errors} isUnary={unary} />
         <OperationButtons selectedOperation={selectedOperation} onSelect={selectOperation} />

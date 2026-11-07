@@ -62,4 +62,44 @@ describe('Calculator', () => {
     await user.click(screen.getByLabelText('Square Root'))
     expect(screen.getByLabelText('Operand B')).toBeDisabled()
   })
+
+  it('C button clears inputs and result but preserves operation and history', async () => {
+    render(<Calculator />)
+    const user = userEvent.setup()
+    await user.click(screen.getByLabelText('Divide'))
+    await user.type(screen.getByLabelText('Operand A'), '5')
+    await user.type(screen.getByLabelText('Operand B'), '3')
+    await user.click(screen.getByText('Calculate'))
+    await waitFor(() => { expect(screen.getByText('History')).toBeInTheDocument() })
+
+    await user.click(screen.getByText('C'))
+
+    expect(screen.getByLabelText('Operand A')).toHaveValue('')
+    expect(screen.getByLabelText('Operand B')).toHaveValue('')
+    expect(screen.getByText('0')).toBeInTheDocument()
+    // History should be preserved
+    expect(screen.getByText('History')).toBeInTheDocument()
+    // Operation should be preserved (Divide, not reset to Add)
+    expect(screen.getByLabelText('Divide')).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('AC button clears everything including history and resets operation to add', async () => {
+    render(<Calculator />)
+    const user = userEvent.setup()
+    await user.click(screen.getByLabelText('Divide'))
+    await user.type(screen.getByLabelText('Operand A'), '10')
+    await user.type(screen.getByLabelText('Operand B'), '2')
+    await user.click(screen.getByText('Calculate'))
+    await waitFor(() => { expect(screen.getByText('History')).toBeInTheDocument() })
+
+    await user.click(screen.getByText('AC'))
+
+    expect(screen.getByLabelText('Operand A')).toHaveValue('')
+    expect(screen.getByLabelText('Operand B')).toHaveValue('')
+    expect(screen.getByText('0')).toBeInTheDocument()
+    // Operation should reset to add
+    expect(screen.getByLabelText('Add')).toHaveAttribute('aria-pressed', 'true')
+    // History should be cleared (component returns null when empty)
+    expect(screen.queryByText('History')).not.toBeInTheDocument()
+  })
 })

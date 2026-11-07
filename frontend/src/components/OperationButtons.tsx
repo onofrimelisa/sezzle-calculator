@@ -21,6 +21,7 @@ export function OperationButtons({ selectedOperation, onSelect }: OperationButto
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
               aria-label={op.label}
+              aria-pressed={selectedOperation === op.name}
             >
               {op.symbol}
             </button>
@@ -40,6 +41,7 @@ export function OperationButtons({ selectedOperation, onSelect }: OperationButto
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
               aria-label={op.label}
+              aria-pressed={selectedOperation === op.name}
             >
               {op.symbol}
             </button>
