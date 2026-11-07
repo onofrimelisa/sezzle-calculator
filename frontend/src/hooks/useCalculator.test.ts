@@ -60,4 +60,33 @@ describe('useCalculator', () => {
     await act(async () => { await result.current.performCalculation(1, 1) })
     expect(result.current.error).toBeNull()
   })
+
+  it('clear() resets result and error but preserves operation', async () => {
+    mockCalculate.mockResolvedValueOnce({
+      operation: 'multiply', operand_a: 2, operand_b: 3, result: 6, timestamp: '2026-11-07T15:04:05Z',
+    })
+    const { result } = renderHook(() => useCalculator())
+    act(() => result.current.selectOperation('multiply'))
+    await act(async () => { await result.current.performCalculation(2, 3) })
+    expect(result.current.result).not.toBeNull()
+
+    act(() => result.current.clear())
+    expect(result.current.result).toBeNull()
+    expect(result.current.error).toBeNull()
+    expect(result.current.selectedOperation).toBe('multiply')
+  })
+
+  it('reset() resets everything including operation to add', async () => {
+    mockCalculate.mockResolvedValueOnce({
+      operation: 'multiply', operand_a: 2, operand_b: 3, result: 6, timestamp: '2026-11-07T15:04:05Z',
+    })
+    const { result } = renderHook(() => useCalculator())
+    act(() => result.current.selectOperation('multiply'))
+    await act(async () => { await result.current.performCalculation(2, 3) })
+
+    act(() => result.current.reset())
+    expect(result.current.result).toBeNull()
+    expect(result.current.error).toBeNull()
+    expect(result.current.selectedOperation).toBe('add')
+  })
 })

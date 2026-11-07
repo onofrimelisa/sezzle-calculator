@@ -40,5 +40,16 @@ export function useCalculator() {
     [selectedOperation]
   )
 
-  return { selectedOperation, selectOperation, result, error, isLoading, performCalculation }
+  const clear = useCallback(() => {
+    setResult(null)
+    setError(null)
+  }, [])
+
+  const reset = useCallback(() => {
+    setResult(null)
+    setError(null)
+    setSelectedOperation('add')
+  }, [])
+
+  return { selectedOperation, selectOperation, result, error, isLoading, performCalculation, clear, reset }
 }
