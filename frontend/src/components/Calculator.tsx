@@ -47,7 +47,19 @@ export function Calculator() {
     }
 
     const response = await performCalculation(parsedA.data, operandB)
-    if (response) { addEntry(response) }
+    if (response) {
+      addEntry(response)
+      // Carry-forward: load result into operand A, clear operand B
+      setValue('operandA', String(response.result))
+      setValue('operandB', '')
+      // Auto-focus operand B for binary operations
+      if (!unary) {
+        setTimeout(() => {
+          const operandBInput = document.getElementById('operandB') as HTMLInputElement | null
+          operandBInput?.focus()
+        }, 0)
+      }
+    }
   }
 
   return (

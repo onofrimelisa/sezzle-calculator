@@ -102,4 +102,41 @@ describe('Calculator', () => {
     // History should be cleared (component returns null when empty)
     expect(screen.queryByText('History')).not.toBeInTheDocument()
   })
+
+  it('carries result forward as operand A after successful calculation', async () => {
+    render(<Calculator />)
+    const user = userEvent.setup()
+    await user.type(screen.getByLabelText('Operand A'), '5')
+    await user.type(screen.getByLabelText('Operand B'), '3')
+    await user.click(screen.getByText('Calculate'))
+    await waitFor(() => { expect(screen.getByText('8')).toBeInTheDocument() })
+
+    // After calculation, operand A should have the result, operand B should be empty
+    expect(screen.getByLabelText('Operand A')).toHaveValue('8')
+    expect(screen.getByLabelText('Operand B')).toHaveValue('')
+  })
+
+  it('auto-focuses operand B after successful binary calculation', async () => {
+    render(<Calculator />)
+    const user = userEvent.setup()
+    await user.type(screen.getByLabelText('Operand A'), '5')
+    await user.type(screen.getByLabelText('Operand B'), '3')
+    await user.click(screen.getByText('Calculate'))
+    await waitFor(() => { expect(screen.getByText('8')).toBeInTheDocument() })
+    await waitFor(() => { expect(screen.getByLabelText('Operand B')).toHaveFocus() })
+  })
+
+  it('does not carry forward on error', async () => {
+    render(<Calculator />)
+    const user = userEvent.setup()
+    await user.click(screen.getByLabelText('Divide'))
+    await user.type(screen.getByLabelText('Operand A'), '10')
+    await user.type(screen.getByLabelText('Operand B'), '0')
+    await user.click(screen.getByText('Calculate'))
+    await waitFor(() => { expect(screen.getByText('Cannot divide by zero')).toBeInTheDocument() })
+
+    // Inputs should stay as they were
+    expect(screen.getByLabelText('Operand A')).toHaveValue('10')
+    expect(screen.getByLabelText('Operand B')).toHaveValue('0')
+  })
 })
