@@ -1,0 +1,153 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "A RESTful calculator API with basic and advanced arithmetic operations.",
+        "title": "Calculator API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/api/calculate": {
+            "post": {
+                "description": "Execute an arithmetic operation with one or two operands",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Calculator"
+                ],
+                "summary": "Perform a calculation",
+                "parameters": [
+                    {
+                        "description": "Calculation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CalculateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.CalculateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/healthz": {
+            "get": {
+                "description": "Returns the service health status",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.CalculateRequest": {
+            "type": "object",
+            "required": [
+                "operand_a",
+                "operation"
+            ],
+            "properties": {
+                "operand_a": {
+                    "type": "number",
+                    "example": 5
+                },
+                "operand_b": {
+                    "type": "number",
+                    "example": 3
+                },
+                "operation": {
+                    "type": "string",
+                    "example": "add"
+                }
+            }
+        },
+        "dto.CalculateResponse": {
+            "type": "object",
+            "properties": {
+                "operand_a": {
+                    "type": "number",
+                    "example": 5
+                },
+                "operand_b": {
+                    "type": "number",
+                    "example": 3
+                },
+                "operation": {
+                    "type": "string",
+                    "example": "add"
+                },
+                "result": {
+                    "type": "number",
+                    "example": 8
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2026-11-07T15:04:05Z"
+                }
+            }
+        },
+        "dto.ErrorDetail": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/dto.ErrorDetail"
+                }
+            }
+        }
+    }
+}

@@ -3,17 +3,17 @@ package dto
 import "time"
 
 type CalculateRequest struct {
-	Operation string   `json:"operation" validate:"required"`
-	OperandA  float64  `json:"operand_a" validate:"required"`
-	OperandB  *float64 `json:"operand_b,omitempty"`
+	Operation string   `json:"operation" validate:"required" example:"add"`
+	OperandA  float64  `json:"operand_a" validate:"required" example:"5"`
+	OperandB  *float64 `json:"operand_b,omitempty" example:"3"`
 }
 
 type CalculateResponse struct {
-	Operation string   `json:"operation"`
-	OperandA  float64  `json:"operand_a"`
-	OperandB  *float64 `json:"operand_b,omitempty"`
-	Result    float64  `json:"result"`
-	Timestamp string   `json:"timestamp"`
+	Operation string   `json:"operation" example:"add"`
+	OperandA  float64  `json:"operand_a" example:"5"`
+	OperandB  *float64 `json:"operand_b,omitempty" example:"3"`
+	Result    float64  `json:"result" example:"8"`
+	Timestamp string   `json:"timestamp" example:"2026-11-07T15:04:05Z"`
 }
 
 func NewCalculateResponse(operation string, a float64, b *float64, result float64) CalculateResponse {

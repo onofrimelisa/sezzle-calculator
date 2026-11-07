@@ -1,0 +1,103 @@
+basePath: /
+definitions:
+  dto.CalculateRequest:
+    properties:
+      operand_a:
+        example: 5
+        type: number
+      operand_b:
+        example: 3
+        type: number
+      operation:
+        example: add
+        type: string
+    required:
+    - operand_a
+    - operation
+    type: object
+  dto.CalculateResponse:
+    properties:
+      operand_a:
+        example: 5
+        type: number
+      operand_b:
+        example: 3
+        type: number
+      operation:
+        example: add
+        type: string
+      result:
+        example: 8
+        type: number
+      timestamp:
+        example: "2026-11-07T15:04:05Z"
+        type: string
+    type: object
+  dto.ErrorDetail:
+    properties:
+      code:
+        type: string
+      details:
+        additionalProperties: true
+        type: object
+      message:
+        type: string
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/dto.ErrorDetail'
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: A RESTful calculator API with basic and advanced arithmetic operations.
+  title: Calculator API
+  version: "1.0"
+paths:
+  /api/calculate:
+    post:
+      consumes:
+      - application/json
+      description: Execute an arithmetic operation with one or two operands
+      parameters:
+      - description: Calculation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CalculateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.CalculateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Perform a calculation
+      tags:
+      - Calculator
+  /healthz:
+    get:
+      description: Returns the service health status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - Health
+swagger: "2.0"
