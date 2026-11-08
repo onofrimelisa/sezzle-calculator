@@ -71,8 +71,7 @@ Decision: Layered architecture -- hexagonal without output ports adds ceremony w
 
 ### Frontend Patterns
 ```
-For a senior-level React calculator, recommend patterns that demonstrate
-expertise without reinventing the wheel:
+For a React calculator, recommend patterns that we should follow to avoid reinventing the wheel:
 - State management approach
 - Form handling and validation
 - API integration pattern
