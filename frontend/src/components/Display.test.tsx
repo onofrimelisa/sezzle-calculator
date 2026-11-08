@@ -11,12 +11,13 @@ describe('Display', () => {
     render(<Display result={42} error={null} isLoading={false} />)
     expect(screen.getByText('42')).toBeInTheDocument()
   })
-  it('shows error', () => {
+  it('shows error below display', () => {
     render(<Display result={null} error="Cannot divide by zero" isLoading={false} />)
     expect(screen.getByText('Cannot divide by zero')).toBeInTheDocument()
+    expect(screen.getByText('0')).toBeInTheDocument()
   })
   it('shows loading', () => {
     render(<Display result={null} error={null} isLoading={true} />)
-    expect(screen.getByText('Calculating...')).toBeInTheDocument()
+    expect(screen.getByText('...')).toBeInTheDocument()
   })
 })

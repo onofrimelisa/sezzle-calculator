@@ -6,11 +6,16 @@ interface DisplayProps {
 
 export function Display({ result, error, isLoading }: DisplayProps) {
   return (
-    <div className="w-full rounded-lg bg-gray-900 p-4 text-right font-mono text-2xl text-white sm:text-3xl">
-      {isLoading && <span className="animate-pulse text-gray-400">Calculating...</span>}
-      {error && <span className="text-red-400">{error}</span>}
-      {result !== null && !error && !isLoading && <span>{result}</span>}
-      {result === null && !error && !isLoading && <span className="text-gray-500">0</span>}
+    <div>
+      <div className="w-full rounded-lg bg-gray-900 p-4 text-right font-mono text-2xl text-white sm:text-3xl">
+        {isLoading && <span className="animate-pulse text-gray-400">...</span>}
+        {!isLoading && <span>{result ?? 0}</span>}
+      </div>
+      {error && (
+        <p className="mt-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

@@ -1,124 +1,193 @@
 # Sezzle Calculator
 
-A full-stack calculator application with a Go backend API and React frontend, built using Spec-Driven Development (SDD).
+Full-stack calculator application — React (TypeScript) frontend + Go backend REST API.
+Built with clean architecture, Spec-Driven Development (SDD), and comprehensive testing.
 
-## Quick Start with Docker
+## Quick Start
 
-Build and run as a single container:
+### Option 1: Docker (recommended)
 
 ```bash
 docker build -t sezzle-calculator .
-docker run -p 80:80 sezzle-calculator
+docker run -p 3000:80 sezzle-calculator
 ```
 
-Open [http://localhost](http://localhost) in your browser.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Quick Start without Docker
+The container runs both the backend API and frontend behind nginx on **port 3000**:
+- Calculator UI: [http://localhost:3000](http://localhost:3000)
+- Health check: [http://localhost:3000/healthz](http://localhost:3000/healthz)
+- Swagger UI: [http://localhost:3000/swagger/index.html](http://localhost:3000/swagger/index.html)
+- Prometheus metrics: [http://localhost:3000/metrics](http://localhost:3000/metrics)
 
-### Backend
+### Option 2: Run locally (without Docker)
 
+**Prerequisites:** Go 1.22+, Node.js 18+
+
+**Backend** (terminal 1):
 ```bash
 cd backend
-go run ./cmd/server
+make run
 ```
+API starts at [http://localhost:8080](http://localhost:8080).
 
-The API runs on [http://localhost:8080](http://localhost:8080).
-
-### Frontend
-
+**Frontend** (terminal 2):
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+UI starts at [http://localhost:5173](http://localhost:5173) — automatically proxies `/api/*` to the backend.
 
-The UI runs on [http://localhost:5173](http://localhost:5173).
-
-## Development with Docker Compose
-
-Run backend and frontend with hot reload:
+### Option 3: Docker Compose (development with hot-reload)
 
 ```bash
-docker compose up
+docker compose up --build
 ```
 
-- Frontend: [http://localhost:5173](http://localhost:5173)
-- Backend: [http://localhost:8080](http://localhost:8080)
+- Frontend with hot-reload: [http://localhost:5173](http://localhost:5173)
+- Backend with hot-reload: [http://localhost:8080](http://localhost:8080)
 
 ## API Examples
 
-**Addition:**
+All operations go through a single endpoint: `POST /api/calculate`
 
+**Addition (binary):**
 ```bash
 curl -X POST http://localhost:8080/api/calculate \
   -H "Content-Type: application/json" \
-  -d '{"operation": "add", "operand_a": 10, "operand_b": 5}'
-# {"result": 15}
+  -d '{"operation": "add", "operand_a": 5, "operand_b": 3}'
+```
+```json
+{
+  "operation": "add",
+  "operand_a": 5,
+  "operand_b": 3,
+  "result": 8,
+  "timestamp": "2026-11-07T15:04:05Z"
+}
 ```
 
-**Square root:**
-
+**Square root (unary — no operand_b):**
 ```bash
 curl -X POST http://localhost:8080/api/calculate \
   -H "Content-Type: application/json" \
-  -d '{"operation": "sqrt", "operand_a": 144}'
-# {"result": 12}
+  -d '{"operation": "sqrt", "operand_a": 9}'
+```
+```json
+{
+  "operation": "sqrt",
+  "operand_a": 9,
+  "result": 3,
+  "timestamp": "2026-11-07T15:04:05Z"
+}
 ```
 
-**Division by zero (error):**
-
+**Division by zero (error response):**
 ```bash
 curl -X POST http://localhost:8080/api/calculate \
   -H "Content-Type: application/json" \
   -d '{"operation": "divide", "operand_a": 10, "operand_b": 0}'
-# {"error": {"code": "DIVISION_BY_ZERO", "message": "cannot divide by zero"}}
 ```
+```json
+{
+  "error": {
+    "code": "DIVISION_BY_ZERO",
+    "message": "Cannot divide by zero",
+    "details": {
+      "operation": "divide",
+      "operand_a": 10,
+      "operand_b": 0
+    }
+  }
+}
+```
+
+> When running via Docker, replace `localhost:8080` with `localhost:3000` in the curl examples above.
 
 ## Available Operations
 
-| Operation  | Type   | Example                          |
-|------------|--------|----------------------------------|
-| `add`      | Binary | `10 + 5 = 15`                    |
-| `subtract` | Binary | `10 - 5 = 5`                     |
-| `multiply` | Binary | `10 * 5 = 50`                    |
-| `divide`   | Binary | `10 / 5 = 2`                     |
-| `negate`   | Unary  | `negate(10) = -10`               |
-| `abs`      | Unary  | `abs(-10) = 10`                  |
-| `sqrt`     | Unary  | `sqrt(144) = 12`                 |
+| Operation    | Type   | Category  | Example              |
+|-------------|--------|-----------|----------------------|
+| `add`       | Binary | Basic     | 5 + 3 = 8            |
+| `subtract`  | Binary | Basic     | 10 - 4 = 6           |
+| `multiply`  | Binary | Basic     | 6 x 7 = 42           |
+| `divide`    | Binary | Basic     | 15 / 3 = 5           |
+| `power`     | Binary | Advanced  | 2 ^ 8 = 256          |
+| `sqrt`      | Unary  | Advanced  | sqrt(9) = 3          |
+| `percentage`| Binary | Advanced  | 15% of 200 = 30      |
 
 ## Testing
 
 ```bash
-# Backend
-cd backend && go test ./... -v
+# Backend (Go) — 59 tests
+cd backend && make test
 
-# Frontend
-cd frontend && npm test
+# Backend with coverage report
+cd backend && make test-coverage
+
+# Frontend (React) — 43 tests
+cd frontend && npx vitest run
+
+# Frontend with coverage
+cd frontend && npx vitest run --coverage
 ```
 
 ## Swagger UI
 
-When the backend is running: [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
+Interactive API documentation is available when the backend is running:
+- Local: [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
+- Docker: [http://localhost:3000/swagger/index.html](http://localhost:3000/swagger/index.html)
 
 ## Design Decisions
 
-1. **Single endpoint with Strategy pattern** -- All operations route through `POST /api/calculate` with a strategy dispatcher. Adding a new operation means implementing an interface and registering it -- no new routes, handlers, or middleware needed.
+1. **Single endpoint with Strategy pattern** — All operations route through `POST /api/calculate` with a Strategy + Registry dispatcher. Adding a new operation means implementing an interface and registering it — zero changes to existing code.
 
-2. **Layered architecture over hexagonal** -- With no database or external service calls, there are no secondary/output ports. Hexagonal architecture would add adapter ceremony without benefit. A clean handler-service-operation layering keeps the code simple and testable.
+2. **Layered architecture over hexagonal** — With no database or external service calls, there are no secondary/output ports. Hexagonal would add ceremony without benefit. Clean handler → service → operation layering keeps the code simple and testable.
 
-3. **slog (stdlib) over third-party loggers** -- Go 1.21+ structured logging covers all needs. No dependency to manage, no API to learn beyond the standard library.
+3. **slog (stdlib) over third-party loggers** — Go 1.21+ structured JSON logging. No dependency to manage, demonstrates knowledge of modern Go stdlib.
 
-4. **Vite + Tailwind CSS** -- Fast build times, hot module replacement, and utility-first CSS for rapid, mobile-first UI development.
+4. **Vite + Tailwind CSS** — Modern build tooling (CRA is deprecated). Tailwind provides mobile-first responsive design with utility classes — no custom CSS needed.
 
-5. **Custom hooks for logic separation** -- `useCalculator` and `useHistory` encapsulate business logic, keeping components focused on rendering. This pattern is testable and composable without a state management library.
+5. **Custom hooks for logic separation** — `useCalculator` and `useHistory` encapsulate all business logic. Components only render. Testable and composable without a state management library.
 
-6. **Spec-Driven Development (SDD)** -- Each operation starts as a spec document defining inputs, outputs, edge cases, and test cases. Implementation follows the spec, ensuring consistency and traceability.
+6. **Spec-Driven Development (SDD)** — Each backend operation starts as a spec document defining inputs, outputs, edge cases, and test cases. See the [SDD Guide](backend/docs/SDD.md) for the full workflow.
+
+## Project Structure
+
+```
+.
+├── backend/                  # Go REST API
+│   ├── cmd/server/           # Entrypoint
+│   ├── internal/
+│   │   ├── domain/           # Strategy interfaces, Registry, errors
+│   │   ├── operations/       # 7 operation implementations
+│   │   ├── service/          # CalculatorService
+│   │   ├── handler/          # HTTP handlers + Swagger
+│   │   ├── dto/              # Request/Response structs
+│   │   ├── middleware/       # RequestID, logging, metrics, recovery
+│   │   └── platform/        # Config, logger, Prometheus metrics
+│   ├── spec/operations/      # SDD specs for each operation
+│   └── docs/                 # DESIGN.md, API.md, SDD.md
+├── frontend/                 # React + TypeScript
+│   ├── src/
+│   │   ├── api/              # Axios client + adapter
+│   │   ├── hooks/            # useCalculator, useHistory
+│   │   ├── components/       # Calculator, Display, OperandInputs, etc.
+│   │   ├── schemas/          # Zod validation
+│   │   └── utils/            # Operation metadata
+│   └── docs/                 # DESIGN.md
+├── nginx/                    # Reverse proxy config
+├── Dockerfile                # Multi-stage production build
+├── docker-compose.yml        # Development with hot-reload
+└── docs/                     # Assignment, prompts, specs
+```
 
 ## Documentation
 
-- [Backend Design](backend/docs/DESIGN.md) -- Architecture, patterns, and backend decisions
-- [Frontend Design](frontend/docs/DESIGN.md) -- Component structure and frontend patterns
-- [API Reference](backend/docs/API.md) -- Endpoint details and request/response schemas
-- [SDD Guide](backend/docs/SDD.md) -- Spec-Driven Development workflow
-- [Assignment](docs/ASSIGNMENT.md) -- Original project requirements
-- [AI Prompts](docs/PROMPTS.md) -- Key prompts used during development
+- [Backend Design & Architecture](backend/docs/DESIGN.md)
+- [Frontend Design & Patterns](frontend/docs/DESIGN.md)
+- [API Reference](backend/docs/API.md)
+- [SDD Workflow Guide](backend/docs/SDD.md)
+- [Original Assignment](docs/ASSIGNMENT.md)
+- [AI Prompts Used](docs/PROMPTS.md)

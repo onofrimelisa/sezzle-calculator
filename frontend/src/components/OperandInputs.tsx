@@ -1,10 +1,26 @@
 import type { UseFormRegister, FieldErrors } from 'react-hook-form'
 import type { CalculatorFormData } from '../schemas/calculator'
+import type { KeyboardEvent } from 'react'
 
 interface OperandInputsProps {
   register: UseFormRegister<CalculatorFormData>
   errors: FieldErrors<CalculatorFormData>
   isUnary: boolean
+}
+
+const ALLOWED_KEYS = new Set([
+  'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+  'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+  'Home', 'End',
+])
+
+function handleNumericKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+  if (ALLOWED_KEYS.has(e.key)) return
+  if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x', 'z'].includes(e.key)) return
+  if (/^[0-9]$/.test(e.key)) return
+  if (e.key === '.' && !e.currentTarget.value.includes('.')) return
+  if (e.key === '-' && e.currentTarget.selectionStart === 0 && !e.currentTarget.value.includes('-')) return
+  e.preventDefault()
 }
 
 export function OperandInputs({ register, errors, isUnary }: OperandInputsProps) {
@@ -17,6 +33,7 @@ export function OperandInputs({ register, errors, isUnary }: OperandInputsProps)
           type="text"
           inputMode="decimal"
           {...register('operandA')}
+          onKeyDown={handleNumericKeyDown}
           className={`w-full rounded-lg border p-3 text-lg ${errors.operandA ? 'border-red-500' : 'border-gray-300'}`}
           placeholder="Enter number"
         />
@@ -29,6 +46,7 @@ export function OperandInputs({ register, errors, isUnary }: OperandInputsProps)
           type="text"
           inputMode="decimal"
           {...register('operandB')}
+          onKeyDown={handleNumericKeyDown}
           disabled={isUnary}
           className={`w-full rounded-lg border p-3 text-lg ${isUnary ? 'cursor-not-allowed bg-gray-100 text-gray-400' : ''} ${errors.operandB ? 'border-red-500' : 'border-gray-300'}`}
           placeholder={isUnary ? 'N/A' : 'Enter number'}

@@ -14,6 +14,7 @@ export function OperationButtons({ selectedOperation, onSelect }: OperationButto
           {BASIC_OPERATIONS.map((op) => (
             <button
               key={op.name}
+              type="button"
               onClick={() => onSelect(op.name)}
               className={`rounded-lg p-3 text-lg font-bold transition-colors ${
                 selectedOperation === op.name
@@ -34,6 +35,7 @@ export function OperationButtons({ selectedOperation, onSelect }: OperationButto
           {ADVANCED_OPERATIONS.map((op) => (
             <button
               key={op.name}
+              type="button"
               onClick={() => onSelect(op.name)}
               className={`rounded-lg p-3 text-lg font-bold transition-colors ${
                 selectedOperation === op.name
